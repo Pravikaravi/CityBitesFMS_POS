@@ -3,97 +3,113 @@ package citybitesfms.model;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Represents a complete customer order containing one or more OrderItems.
+ * Order — represents a complete customer order containing one or more CartItems.
  *
- * This class demonstrates OOP through:
- *  - Encapsulation: private fields exposed via getters
- *  - Composition:   an Order is composed of a List of OrderItems
- *  - Behaviour:     getTotalAmount() aggregates child subtotals
+ * Demonstrates OOP through:
+ *   Encapsulation : private fields accessed via getters
+ *   Composition   : an Order is composed of a list of CartItems
+ *   Behaviour     : getTotalAmount() aggregates child subtotals
  *
  * @author NovaSoft Solutions (PVT) Ltd
- * @version 1.0
+ * @version 2.0
  */
 public class Order {
 
-    private int orderId;
-    private String customerName;
-    private List<OrderItem> items;      // Composition — Order owns its items
-    private LocalDateTime orderTime;
+    /** Unique order identifier assigned by FoodDataStore. */
+    private final int    orderId;
+
+    /** Username of the customer who placed this order. */
+    private final String customerName;
+
+    /** Line items in this order. */
+    private final ArrayList<CartItem> items;
+
+    /** Timestamp recorded when the Order object is created. */
+    private final LocalDateTime orderTime;
+
+    /** Whether the customer has confirmed (accepted) this order. */
     private boolean confirmed;
 
     /**
-     * Constructs a new Order for a given customer.
+     * Constructs a new Order for the given customer.
      *
-     * @param orderId      Unique order identifier assigned by DataStore
+     * @param orderId      Unique identifier assigned by FoodDataStore
      * @param customerName Username of the customer placing the order
      */
     public Order(int orderId, String customerName) {
-        this.orderId = orderId;
+        this.orderId      = orderId;
         this.customerName = customerName;
-        this.items = new ArrayList<>();
-        this.orderTime = LocalDateTime.now();
-        this.confirmed = false;
+        this.items        = new ArrayList<>();
+        this.orderTime    = LocalDateTime.now();
+        this.confirmed    = false;
     }
 
-    // ─── Business Methods ──────────────────────────────────────────────────────
+    // ─── Business Methods ─────────────────────────────────────────────────────
 
     /**
-     * Adds an OrderItem to this order.
+     * Appends a CartItem to this order.
      *
-     * @param item The OrderItem to add
+     * @param item The cart line to add
      */
-    public void addItem(OrderItem item) {
+    public void addItem(CartItem item) {
         items.add(item);
     }
 
     /**
-     * Calculates the grand total for the entire order.
-     * Iterates through all items and sums their subtotals.
+     * Calculates the grand total by summing all CartItem subtotals.
      *
-     * @return Total amount in Sri Lankan Rupees
+     * @return Total order amount
      */
     public double getTotalAmount() {
         double total = 0;
-        for (OrderItem item : items) {
-            total += item.getSubtotal();
-        }
+        for (CartItem item : items) total += item.getSubtotal();
         return total;
     }
 
     /**
-     * Marks this order as confirmed (customer has accepted the summary).
+     * Marks this order as confirmed by the customer.
      */
-    public void confirm() {
-        this.confirmed = true;
-    }
+    public void confirm() { this.confirmed = true; }
 
-    // ─── Getters ───────────────────────────────────────────────────────────────
+    // ─── Getters ──────────────────────────────────────────────────────────────
 
-    public int getOrderId() {
-        return orderId;
-    }
+    /** @return Unique order ID */
+    public int    getOrderId()      { return orderId;      }
 
-    public String getCustomerName() {
-        return customerName;
-    }
+    /** @return Customer username */
+    public String getCustomerName() { return customerName; }
 
-    public List<OrderItem> getItems() {
-        return items;
-    }
+    /** @return List of CartItems in this order */
+    public ArrayList<CartItem> getItems() { return items; }
 
-    public boolean isConfirmed() {
-        return confirmed;
+    /** @return true if the customer has confirmed this order */
+    public boolean isConfirmed()    { return confirmed;    }
+
+    /**
+     * Returns the order date/time as a formatted string.
+     *
+     * @return "yyyy-MM-dd HH:mm:ss" formatted timestamp
+     */
+    public String getOrderDate() {
+        return orderTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
     /**
-     * Returns the order timestamp formatted as "yyyy-MM-dd HH:mm:ss".
+     * Alias for {@link #getOrderDate()} — kept for compatibility.
      *
-     * @return Human-readable date/time string
+     * @return Formatted timestamp
      */
-    public String getFormattedTime() {
-        return orderTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    public String getFormattedTime() { return getOrderDate(); }
+
+    /**
+     * Returns a short summary of this order.
+     *
+     * @return "Order #ID — Customer — Rs. X.XX"
+     */
+    @Override
+    public String toString() {
+        return String.format("Order #%d — %s — Rs. %.2f", orderId, customerName, getTotalAmount());
     }
 }

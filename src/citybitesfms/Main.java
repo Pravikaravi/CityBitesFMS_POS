@@ -6,42 +6,44 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 /**
- * Application entry point for the City Bites Food Management System.
+ * Main — application entry point for the City Bites Food Management System.
  *
- * This class contains only the {@code main} method, which is the first
- * method the JVM calls when the program starts.
+ * Responsibilities:
+ *   1. Apply the Nimbus Look-and-Feel for a modern, non-grey Swing appearance.
+ *   2. Schedule the first frame (LoginFrame) on the Event Dispatch Thread (EDT).
  *
- * Key design decisions:
- *  1. {@code UIManager.setLookAndFeel()} applies the platform's native
- *     look-and-feel so the application blends in with Windows.
- *  2. {@code SwingUtilities.invokeLater()} schedules all UI work on the
- *     Event Dispatch Thread (EDT) — the single thread Swing requires for
- *     thread-safe GUI updates.  This is standard Java Swing practice.
+ * The EDT requirement is standard Java Swing practice: all UI creation and
+ * updates must run on the single dedicated GUI thread to avoid race conditions.
  *
  * @author NovaSoft Solutions (PVT) Ltd
- * @version 1.0
+ * @version 2.0
  */
 public class Main {
 
     /**
      * Launches the City Bites Food Management System.
      *
+     * Sets Nimbus Look-and-Feel so the application looks modern and clean,
+     * then opens the LoginFrame on the Event Dispatch Thread.
+     *
      * @param args Command-line arguments (not used)
      */
     public static void main(String[] args) {
 
-        // Apply the host operating system's native look and feel
+        // ── Apply Nimbus Look-and-Feel ─────────────────────────────────────
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
         } catch (Exception e) {
-            // Fall back to the default Swing cross-platform look and feel
-            System.err.println("Could not set system look-and-feel: " + e.getMessage());
+            // Nimbus not available — fall back to the cross-platform default
+            System.err.println("Nimbus LAF not available: " + e.getMessage());
         }
 
-        // Schedule the first frame on the Event Dispatch Thread (EDT)
-        SwingUtilities.invokeLater(() -> {
-            LoginSelectionFrame frame = new LoginSelectionFrame();
-            frame.setVisible(true);
-        });
+        // ── Launch on the Event Dispatch Thread ────────────────────────────
+        SwingUtilities.invokeLater(() -> new LoginSelectionFrame());
     }
 }

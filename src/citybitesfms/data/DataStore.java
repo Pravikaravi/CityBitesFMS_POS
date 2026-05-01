@@ -91,11 +91,11 @@ public class DataStore {
     // ─── Food Item CRUD ────────────────────────────────────────────────────────
 
     public void addFoodItem(String name, double price) {
-        foodItems.add(new FoodItem(nextFoodItemId++, name, price, "Main"));
+        foodItems.add(new FoodItem(nextFoodItemId++, name, "Main", price, true));
     }
 
     public void addFoodItem(String name, double price, String category) {
-        foodItems.add(new FoodItem(nextFoodItemId++, name, price, category));
+        foodItems.add(new FoodItem(nextFoodItemId++, name, category, price, true));
     }
 
     public void updateFoodItem(int id, String name, double price) {
@@ -138,6 +138,6 @@ public class DataStore {
     // ─── Private Helper ────────────────────────────────────────────────────────
 
     private void seed(String name, double price, String category) {
-        foodItems.add(new FoodItem(nextFoodItemId++, name, price, category));
+        foodItems.add(new FoodItem(nextFoodItemId++, name, category, price, true));
     }
 }
