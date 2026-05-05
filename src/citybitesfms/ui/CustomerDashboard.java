@@ -21,16 +21,20 @@ public class CustomerDashboard extends JFrame {
     private static final String CARD_MENU   = "MENU";
     private static final String CARD_ORDERS = "MYORDERS";
 
+    // 10% tax applied to all orders
     private static final double TAX_RATE = 0.10;
 
+    // placeholder colours used when a food item has no image
     private static final Color[] PLATE_COLORS = {
         new Color(255, 183, 107), new Color(147, 197, 253), new Color(167, 243, 208),
         new Color(253, 164, 175), new Color(196, 181, 253), new Color(253, 230, 138),
         new Color(134, 239, 172), new Color(252, 165, 165),
     };
 
+    // cache images so they are only loaded once per session
     private static final Map<Integer, BufferedImage> IMAGE_CACHE = new HashMap<>();
 
+    // LinkedHashMap keeps items in the order they were added to cart
     private final LinkedHashMap<Integer, CartItem> cart = new LinkedHashMap<>();
 
     private final String customerName;
@@ -223,7 +227,9 @@ public class CustomerDashboard extends JFrame {
     private void refreshGrid() {
         foodGrid.removeAll();
         for (FoodItem item : FoodDataStore.getFoodItems()) {
+            // skip unavailable items
             if (!item.isAvailable()) continue;
+            // filter by selected category unless "All" is chosen
             if (!"All".equals(selectedCategory) && !item.getCategory().equals(selectedCategory)) continue;
             foodGrid.add(buildFoodCard(item));
         }
@@ -476,6 +482,7 @@ public class CustomerDashboard extends JFrame {
 
     private void addToCart(FoodItem food) {
         int id = food.getId();
+        // if item already in cart, increase quantity instead of adding again
         if (cart.containsKey(id)) {
             CartItem existing = cart.get(id);
             existing.setQuantity(existing.getQuantity() + 1);
@@ -659,10 +666,12 @@ public class CustomerDashboard extends JFrame {
     }
 
     private void confirmOrder() {
+        // don't allow empty orders
         if (cart.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Your cart is empty.\nAdd some items first!",
                 "Empty Cart", JOptionPane.WARNING_MESSAGE); return;
         }
+        // build the order summary text
         StringBuilder sb = new StringBuilder("Order for: ").append(customerName).append("\n");
         sb.append("────────────────────────────────\n");
         double sub = 0;
@@ -756,6 +765,7 @@ public class CustomerDashboard extends JFrame {
     private void loadMyOrders() {
         if (myOrdersModel == null) return;
         myOrdersModel.setRowCount(0);
+        // only show orders that belong to this customer
         for (Order order : FoodDataStore.getOrders()) {
             if (!order.getCustomerName().equals(customerName)) continue;
             myOrdersModel.addRow(new Object[]{

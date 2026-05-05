@@ -21,11 +21,14 @@ public class LoginSelectionFrame extends JFrame {
     private static final Color TEXT_MUT   = new Color(100, 130, 110);
     private static final Color BORDER_CLR = new Color(200, 230, 210);
 
+    // hardcoded admin credentials
     private static final String ADMIN_USER = "admin";
     private static final String ADMIN_PASS = "admin123";
 
+    // three food images shown on the left decorative panel
     private BufferedImage imgA, imgB, imgC;
 
+    // tracks whether admin or customer tab is selected
     private boolean        isAdminMode = false;
     private JButton        adminTab, custTab;
     private JTextField     usernameField;
@@ -43,12 +46,14 @@ public class LoginSelectionFrame extends JFrame {
     }
 
     private void loadImages() {
+        // pick three food photos to display on the left panel
         imgA = loadImg(4);
         imgB = loadImg(1);
         imgC = loadImg(11);
     }
 
     private BufferedImage loadImg(int id) {
+        // try common image extensions until one works
         for (String ext : new String[]{".jpg", ".jpeg", ".png"}) {
             try (InputStream is = getClass().getResourceAsStream(
                     "/citybitesfms/resources/images/food_" + id + ext)) {
@@ -336,12 +341,14 @@ public class LoginSelectionFrame extends JFrame {
         String pass = new String(passwordField.getPassword());
         errorLabel.setText(" ");
 
+        // check fields are not empty
         if (user.isEmpty() || pass.isEmpty()) {
             errorLabel.setText("Please enter both username and password.");
             return;
         }
 
         if (isAdminMode) {
+            // check against hardcoded admin credentials
             if (ADMIN_USER.equals(user) && ADMIN_PASS.equals(pass)) {
                 dispose(); new AdminDashboard(user);
             } else {
@@ -349,6 +356,7 @@ public class LoginSelectionFrame extends JFrame {
                 passwordField.setText("");
             }
         } else {
+            // check against registered customer accounts
             if (FoodDataStore.authenticateCustomer(user, pass)) {
                 dispose(); new CustomerDashboard(user);
             } else {

@@ -3,7 +3,6 @@ package citybitesfms.model;
 public class CartItem {
 
     private FoodItem foodItem;
-
     private int quantity;
 
     public CartItem(FoodItem foodItem, int quantity) {
@@ -17,6 +16,7 @@ public class CartItem {
 
     public void setQuantity(int quantity) { this.quantity = quantity; }
 
+    // price x quantity gives the line total
     public double getSubtotal() {
         return foodItem.getPrice() * quantity;
     }

@@ -21,15 +21,18 @@ import java.util.Map;
 
 public class AdminDashboard extends JFrame {
 
+    // card names for switching between menu and orders views
     private static final String CARD_MENU   = "MENU";
     private static final String CARD_ORDERS = "ORDERS";
 
+    // fallback colours when no image is available for a food item
     private static final Color[] PLATE_COLORS = {
         new Color(255, 183, 107), new Color(147, 197, 253), new Color(167, 243, 208),
         new Color(253, 164, 175), new Color(196, 181, 253), new Color(253, 230, 138),
         new Color(134, 239, 172), new Color(252, 165, 165),
     };
 
+    // cache loaded images so we don't reload from disk every time
     private static final Map<Integer, BufferedImage> IMAGE_CACHE = new HashMap<>();
 
     private CardLayout contentCards;
@@ -38,6 +41,7 @@ public class AdminDashboard extends JFrame {
     private JPanel     foodGridPanel;
     private JTextField searchField;
 
+    // track which food card is currently selected
     private FoodItem   selectedItem = null;
     private JPanel     selectedCard = null;
 
@@ -68,9 +72,11 @@ public class AdminDashboard extends JFrame {
 
     private void buildUI() {
         JPanel root = new JPanel(new BorderLayout());
+        // sidebar on the left, main content on the right
         root.add(buildSidebar(),     BorderLayout.WEST);
         root.add(buildContentArea(), BorderLayout.CENTER);
         setContentPane(root);
+        // load data when the window first opens
         loadMenuGrid(null);
         loadOrders();
     }
@@ -206,8 +212,10 @@ public class AdminDashboard extends JFrame {
         foodGridPanel.removeAll();
         selectedItem = null;
         selectedCard = null;
+        // convert filter to lowercase for case-insensitive search
         String lower = (filter == null) ? "" : filter.trim().toLowerCase();
         for (FoodItem item : FoodDataStore.getFoodItems()) {
+            // skip items that don't match the search
             if (!lower.isBlank() && !item.getName().toLowerCase().contains(lower)) continue;
             foodGridPanel.add(buildAdminFoodCard(item));
         }
@@ -451,11 +459,13 @@ public class AdminDashboard extends JFrame {
         addBtn.addActionListener(e -> {
             String name = nameField.getText().trim(), priceStr = priceField.getText().trim();
             String cat  = (String) categoryCombo.getSelectedItem();
+            // validate inputs before saving
             if (!validate(name, priceStr)) return;
-            int newId = FoodDataStore.getNextItemId();          
+            int newId = FoodDataStore.getNextItemId();
             FoodDataStore.addFoodItem(
                 new FoodItem(newId, name, cat, Double.parseDouble(priceStr), availableBox.isSelected()));
-            saveImageForItem(newId);                            
+            // save the chosen image with the new item id
+            saveImageForItem(newId);
             clearForm();
             loadMenuGrid(null);
             showInfo("\"" + name + "\" added to the menu.");
@@ -521,6 +531,7 @@ public class AdminDashboard extends JFrame {
     }
 
     private void saveImageForItem(int itemId) {
+        // nothing to save if admin didn't pick an image
         if (pendingImageFile == null) return;
 
         String sep      = File.separator;
@@ -594,6 +605,7 @@ public class AdminDashboard extends JFrame {
     }
 
     private void loadOrders() {
+        // clear old rows then reload from data store
         ordersTableModel.setRowCount(0);
         for (Order order : FoodDataStore.getOrders()) {
             ordersTableModel.addRow(new Object[]{
@@ -651,8 +663,10 @@ public class AdminDashboard extends JFrame {
     }
 
     private BufferedImage loadFoodImage(int foodId) {
+        // return cached image if already loaded
         if (IMAGE_CACHE.containsKey(foodId)) return IMAGE_CACHE.get(foodId);
         BufferedImage img = null;
+        // try both .jpg and .jpeg extensions
         for (String ext : new String[]{".jpg", ".jpeg"}) {
             String path = "/citybitesfms/resources/images/food_" + foodId + ext;
             try (InputStream is = getClass().getResourceAsStream(path)) {

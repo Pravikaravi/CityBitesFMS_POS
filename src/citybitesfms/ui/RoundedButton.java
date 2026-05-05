@@ -3,6 +3,7 @@ package citybitesfms.ui;
 import javax.swing.JButton;
 import java.awt.*;
 
+// custom button with rounded corners and hover effect
 public class RoundedButton extends JButton {
 
     private final Color baseColor;
@@ -17,6 +18,7 @@ public class RoundedButton extends JButton {
         this.baseColor  = baseColor;
         this.arcRadius  = arcRadius;
 
+        // disable default swing button drawing so we can draw our own
         setOpaque(false);
         setContentAreaFilled(false);
         setBorderPainted(false);
@@ -31,6 +33,7 @@ public class RoundedButton extends JButton {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+        // change shade depending on mouse state
         Color fill = baseColor;
         if (getModel().isPressed()) {
             fill = baseColor.darker().darker();

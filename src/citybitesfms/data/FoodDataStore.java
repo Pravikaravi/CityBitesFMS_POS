@@ -9,24 +9,28 @@ import java.util.Map;
 
 public class FoodDataStore {
 
+    // menu categories shown in the admin form dropdown
     public static final String[] CATEGORIES = {
         "Pizza", "Burger", "Soup", "Pasta", "Fish", "Chicken", "Chips", "Wine", "Dessert"
     };
 
+    // stores all food items in memory
     private static final ArrayList<FoodItem> FOOD_ITEMS = new ArrayList<>();
 
+    // stores all placed orders
     private static final ArrayList<Order> ORDERS = new ArrayList<>();
 
+    // username -> password map for customer accounts
     private static final Map<String, String> CUSTOMER_ACCOUNTS = new HashMap<>();
 
     private static int nextItemId  = 1;
-
     private static int nextOrderId = 1;
 
     static {
-        
+        // default demo customer account
         CUSTOMER_ACCOUNTS.put("user", "user123");
 
+        // load initial menu items by category
         seed("Margherita Pizza",   "Pizza",   850.00);
         seed("Pepperoni Pizza",    "Pizza",   950.00);
         seed("BBQ Chicken Pizza",  "Pizza",  1050.00);
@@ -58,8 +62,10 @@ public class FoodDataStore {
         seed("Cheesecake",         "Dessert", 420.00);
     }
 
+    // prevent instantiation since everything is static
     private FoodDataStore() {}
 
+    // check if username already exists
     public static boolean customerExists(String username) {
         return CUSTOMER_ACCOUNTS.containsKey(username);
     }
@@ -70,6 +76,7 @@ public class FoodDataStore {
         return true;
     }
 
+    // verify customer login credentials
     public static boolean authenticateCustomer(String username, String password) {
         String stored = CUSTOMER_ACCOUNTS.get(username);
         return stored != null && stored.equals(password);
@@ -77,12 +84,14 @@ public class FoodDataStore {
 
     public static ArrayList<FoodItem> getFoodItems() { return FOOD_ITEMS; }
 
+    // assign a new id and add the item to the list
     public static void addFoodItem(FoodItem item) {
-        item.setName(item.getName()); 
+        item.setName(item.getName());
         FOOD_ITEMS.add(new FoodItem(
             nextItemId++, item.getName(), item.getCategory(), item.getPrice(), item.isAvailable()));
     }
 
+    // find item by id and replace it with updated version
     public static void updateFoodItem(FoodItem updated) {
         for (int i = 0; i < FOOD_ITEMS.size(); i++) {
             if (FOOD_ITEMS.get(i).getId() == updated.getId()) {
@@ -104,6 +113,7 @@ public class FoodDataStore {
 
     public static int getNextOrderId() { return nextOrderId++; }
 
+    // helper to create and add a food item during startup
     private static void seed(String name, String category, double price) {
         FOOD_ITEMS.add(new FoodItem(nextItemId++, name, category, price, true));
     }

@@ -7,6 +7,7 @@ import java.util.*;
 
 public class DataStore {
 
+    // singleton instance
     private static DataStore instance;
 
     public static DataStore getInstance() {
@@ -25,7 +26,7 @@ public class DataStore {
     private static final String ADMIN_PASSWORD = "admin123";
 
     private DataStore() {
-        
+        // seed initial food items
         seed("Spring Rolls",         180.00, "Starters");
         seed("Prawn Toast",          220.00, "Starters");
         seed("Crispy Wontons",       200.00, "Starters");
@@ -49,16 +50,19 @@ public class DataStore {
         seed("Ice Cream",            180.00, "Desserts");
         seed("Watalappam",           150.00, "Desserts");
 
+        // default customer accounts for testing
         customerCredentials.put("customer1", "pass123");
         customerCredentials.put("john",      "john123");
         customerCredentials.put("mary",      "mary123");
         customerCredentials.put("demo",      "demo");
     }
 
+    // check admin credentials
     public boolean authenticateAdmin(String u, String p) {
         return ADMIN_USERNAME.equals(u) && ADMIN_PASSWORD.equals(p);
     }
 
+    // check customer credentials
     public boolean authenticateCustomer(String u, String p) {
         String s = customerCredentials.get(u);
         return s != null && s.equals(p);
@@ -84,6 +88,7 @@ public class DataStore {
 
     public List<FoodItem> getFoodItems() { return new ArrayList<>(foodItems); }
 
+    // collect unique categories from the food list
     public List<String> getCategories() {
         Set<String> seen = new LinkedHashSet<>();
         for (FoodItem item : foodItems) seen.add(item.getCategory());

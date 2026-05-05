@@ -39,9 +39,10 @@ public class SignupFrame extends JFrame {
     }
 
     private void loadImages() {
-        imgA = loadImg(16);   
-        imgB = loadImg(7);    
-        imgC = loadImg(3);    
+        // load three food photos for the decorative left panel
+        imgA = loadImg(16);
+        imgB = loadImg(7);
+        imgC = loadImg(3);
     }
 
     private BufferedImage loadImg(int id) {
@@ -289,9 +290,11 @@ public class SignupFrame extends JFrame {
         String confirm  = new String(confirmField.getPassword());
         errorLabel.setText(" ");
 
+        // validate each field step by step
         if (username.isEmpty()) {
             errorLabel.setText("Username cannot be empty."); return;
         }
+        // check if username is already taken
         if (FoodDataStore.customerExists(username)) {
             errorLabel.setText("Username \"" + username + "\" is already taken.");
             usernameField.selectAll(); usernameField.requestFocus(); return;
@@ -301,6 +304,7 @@ public class SignupFrame extends JFrame {
             passwordField.setText(""); confirmField.setText("");
             passwordField.requestFocus(); return;
         }
+        // make sure both password fields match
         if (!password.equals(confirm)) {
             errorLabel.setText("Passwords do not match. Please try again.");
             confirmField.setText(""); confirmField.requestFocus(); return;
