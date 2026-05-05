@@ -5,18 +5,6 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 
-/**
- * Full-screen admin login screen.
- *
- * Left  — dark sidebar panel matching the POS brand theme.
- * Right — light panel with a centred white login card.
- *
- * Validates credentials against DataStore and navigates to AdminDashboard
- * on success. Demonstrates Event-Driven Programming via ActionListeners.
- *
- * @author NovaSoft Solutions (PVT) Ltd
- * @version 4.0
- */
 public class AdminLoginFrame extends JFrame {
 
     private JTextField     usernameField;
@@ -39,8 +27,6 @@ public class AdminLoginFrame extends JFrame {
         setContentPane(root);
     }
 
-    // ─── Left dark panel ──────────────────────────────────────────────────────
-
     private JPanel buildHeroPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(UITheme.SIDEBAR_BG);
@@ -50,7 +36,6 @@ public class AdminLoginFrame extends JFrame {
         inner.setOpaque(false);
         inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
 
-        // Logo
         JPanel logo = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -127,8 +112,6 @@ public class AdminLoginFrame extends JFrame {
         panel.add(inner);
         return panel;
     }
-
-    // ─── Right form panel ─────────────────────────────────────────────────────
 
     private JPanel buildFormPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
@@ -210,8 +193,6 @@ public class AdminLoginFrame extends JFrame {
         return panel;
     }
 
-    // ─── Auth logic ───────────────────────────────────────────────────────────
-
     private void handleLogin() {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
@@ -228,8 +209,6 @@ public class AdminLoginFrame extends JFrame {
             usernameField.requestFocus();
         }
     }
-
-    // ─── Helpers ──────────────────────────────────────────────────────────────
 
     private JLabel makeLabel(String text) {
         JLabel lbl = new JLabel(text);

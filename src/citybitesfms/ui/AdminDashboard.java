@@ -19,81 +19,43 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * AdminDashboard — full-screen administration panel for City Bites.
- *
- * Layout:
- *   WEST   — dark-green sidebar (200 px)
- *   CENTER — CardLayout content:
- *              "MENU"   : photo card grid + Add/Edit form (with image upload)
- *              "ORDERS" : customer orders table
- *
- * Image upload workflow:
- *   1. Admin clicks "Choose Image" in the form → JFileChooser opens
- *   2. Circular preview appears in the form
- *   3. On "Add Item" or "Update": image is written to both
- *        build/classes/.../resources/images/food_X.jpg  (live)
- *        src/.../resources/images/food_X.jpg            (persists after rebuild)
- *   4. Image cache is cleared so the grid reloads the new photo immediately
- *
- * @author NovaSoft Solutions (PVT) Ltd
- * @version 4.0
- */
 public class AdminDashboard extends JFrame {
 
-    // ── Card keys ─────────────────────────────────────────────────────────────
     private static final String CARD_MENU   = "MENU";
     private static final String CARD_ORDERS = "ORDERS";
 
-    // ── Fallback plate colours ────────────────────────────────────────────────
     private static final Color[] PLATE_COLORS = {
         new Color(255, 183, 107), new Color(147, 197, 253), new Color(167, 243, 208),
         new Color(253, 164, 175), new Color(196, 181, 253), new Color(253, 230, 138),
         new Color(134, 239, 172), new Color(252, 165, 165),
     };
 
-    // ── Image cache ───────────────────────────────────────────────────────────
     private static final Map<Integer, BufferedImage> IMAGE_CACHE = new HashMap<>();
 
-    // ── Layout ────────────────────────────────────────────────────────────────
     private CardLayout contentCards;
     private JPanel     contentPanel;
 
-    // ── Menu grid ─────────────────────────────────────────────────────────────
     private JPanel     foodGridPanel;
     private JTextField searchField;
 
-    // ── Selection tracking ────────────────────────────────────────────────────
     private FoodItem   selectedItem = null;
     private JPanel     selectedCard = null;
 
-    // ── Form fields ───────────────────────────────────────────────────────────
     private JTextField        nameField;
     private JTextField        priceField;
     private JComboBox<String> categoryCombo;
     private JCheckBox         availableBox;
 
-    // ── Image upload state ────────────────────────────────────────────────────
-    private File          pendingImageFile  = null;   // file chosen by admin
-    private BufferedImage previewImg        = null;   // decoded for preview
-    private JPanel        imagePreviewPanel = null;   // circular preview widget
-    private JLabel        imageStatusLabel  = null;   // "Image selected" hint
+    private File          pendingImageFile  = null;   
+    private BufferedImage previewImg        = null;   
+    private JPanel        imagePreviewPanel = null;   
+    private JLabel        imageStatusLabel  = null;   
 
-    // ── Orders panel ─────────────────────────────────────────────────────────
     private DefaultTableModel ordersTableModel;
     private JTable            ordersTable;
 
     private final String adminName;
 
-    // =========================================================================
-    // CONSTRUCTOR
-    // =========================================================================
-
-    /**
-     * Constructs and displays the AdminDashboard.
-     *
-     * @param adminName Username of the logged-in administrator
-     */
     public AdminDashboard(String adminName) {
         this.adminName = adminName;
         setTitle("City Bites — Admin Dashboard");
@@ -104,10 +66,6 @@ public class AdminDashboard extends JFrame {
         setVisible(true);
     }
 
-    // =========================================================================
-    // ROOT LAYOUT
-    // =========================================================================
-
     private void buildUI() {
         JPanel root = new JPanel(new BorderLayout());
         root.add(buildSidebar(),     BorderLayout.WEST);
@@ -116,10 +74,6 @@ public class AdminDashboard extends JFrame {
         loadMenuGrid(null);
         loadOrders();
     }
-
-    // =========================================================================
-    // SIDEBAR
-    // =========================================================================
 
     private JPanel buildSidebar() {
         JPanel sidebar = new JPanel();
@@ -178,10 +132,6 @@ public class AdminDashboard extends JFrame {
         return btn;
     }
 
-    // =========================================================================
-    // CONTENT AREA
-    // =========================================================================
-
     private JPanel buildContentArea() {
         contentCards = new CardLayout();
         contentPanel = new JPanel(contentCards);
@@ -191,10 +141,6 @@ public class AdminDashboard extends JFrame {
         return contentPanel;
     }
 
-    // =========================================================================
-    // MENU PANEL — photo grid + form with image upload
-    // =========================================================================
-
     private JPanel buildMenuPanel() {
         JPanel panel = new JPanel(new BorderLayout(14, 0));
         panel.setBackground(UITheme.BG);
@@ -203,8 +149,6 @@ public class AdminDashboard extends JFrame {
         panel.add(buildMenuFormCard(),    BorderLayout.EAST);
         return panel;
     }
-
-    // ── Left: photo card grid ─────────────────────────────────────────────────
 
     private JPanel buildMenuGridSection() {
         JPanel section = new JPanel(new BorderLayout(0, 10));
@@ -227,7 +171,7 @@ public class AdminDashboard extends JFrame {
 
         JButton addItemBtn = makeGreenButton("+ Add Item");
         addItemBtn.setPreferredSize(new Dimension(105, 36));
-        addItemBtn.addActionListener(e -> clearForm());   // just clear form — admin fills + clicks Add
+        addItemBtn.addActionListener(e -> clearForm());   
 
         JPanel searchGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         searchGroup.setBackground(UITheme.BG);
@@ -258,11 +202,6 @@ public class AdminDashboard extends JFrame {
         return section;
     }
 
-    /**
-     * Reloads the food card grid, optionally filtered by a search term.
-     *
-     * @param filter Search text — null or blank shows all items
-     */
     private void loadMenuGrid(String filter) {
         foodGridPanel.removeAll();
         selectedItem = null;
@@ -276,13 +215,6 @@ public class AdminDashboard extends JFrame {
         foodGridPanel.repaint();
     }
 
-    /**
-     * Builds a single admin food card.
-     * Clicking selects it (green border) and populates the edit form.
-     *
-     * @param item FoodItem to display
-     * @return Styled card JPanel
-     */
     private JPanel buildAdminFoodCard(FoodItem item) {
         Color         plate = PLATE_COLORS[(item.getId() - 1) % PLATE_COLORS.length];
         BufferedImage img   = loadFoodImage(item.getId());
@@ -308,7 +240,6 @@ public class AdminDashboard extends JFrame {
         card.setBorder(new EmptyBorder(12, 10, 12, 10));
         card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // Circular image
         JPanel circle = buildCirclePanel(img, plate, item, 90);
         circle.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -354,7 +285,6 @@ public class AdminDashboard extends JFrame {
         card.add(Box.createVerticalStrut(5));
         card.add(badge);
 
-        // Click → select card + fill form
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -362,12 +292,12 @@ public class AdminDashboard extends JFrame {
                 selectedCard = card;
                 selectedItem = item;
                 card.repaint();
-                // Populate form fields
+                
                 nameField    .setText(item.getName());
                 priceField   .setText(String.format("%.2f", item.getPrice()));
                 categoryCombo.setSelectedItem(item.getCategory());
                 availableBox .setSelected(item.isAvailable());
-                // Show existing image in preview
+                
                 pendingImageFile = null;
                 previewImg       = loadFoodImage(item.getId());
                 imageStatusLabel .setText(previewImg != null ? "Current image loaded" : "No image yet");
@@ -381,16 +311,6 @@ public class AdminDashboard extends JFrame {
         return card;
     }
 
-    // ── Right: Add / Edit form with image upload ───────────────────────────────
-
-    /**
-     * Builds the right-side form card.
-     *
-     * Contains: image preview circle, "Choose Image" button, item fields,
-     * and Add / Update / Delete / Clear action buttons.
-     *
-     * @return Form JPanel
-     */
     private JPanel buildMenuFormCard() {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(UITheme.SURFACE);
@@ -404,7 +324,6 @@ public class AdminDashboard extends JFrame {
         heading.setForeground(UITheme.TEXT_PRI);
         heading.setBorder(new EmptyBorder(0, 0, 14, 0));
 
-        // ── Image upload area ──────────────────────────────────────────────
         imagePreviewPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -416,20 +335,20 @@ public class AdminDashboard extends JFrame {
                 int size = Math.min(getWidth(), getHeight()) - 6;
                 int x = (getWidth() - size) / 2, y = (getHeight() - size) / 2;
                 if (previewImg != null) {
-                    // Shadow
+                    
                     g2.setColor(new Color(0, 0, 0, 15));
                     g2.fillOval(x - 2, y + 3, size + 4, size + 4);
-                    // Circular clip
+                    
                     Shape clip = new Ellipse2D.Float(x, y, size, size);
                     g2.setClip(clip);
                     g2.drawImage(previewImg, x, y, size, size, null);
                     g2.setClip(null);
-                    // Green border ring
+                    
                     g2.setColor(UITheme.PRIMARY);
                     g2.setStroke(new BasicStroke(2.5f));
                     g2.drawOval(x + 1, y + 1, size - 2, size - 2);
                 } else {
-                    // Dashed empty circle
+                    
                     g2.setColor(new Color(230, 230, 230));
                     g2.fillOval(x, y, size, size);
                     g2.setColor(UITheme.BORDER);
@@ -438,7 +357,7 @@ public class AdminDashboard extends JFrame {
                         BasicStroke.JOIN_ROUND, 0, dash, 0));
                     g2.drawOval(x + 1, y + 1, size - 2, size - 2);
                     g2.setStroke(new BasicStroke(1f));
-                    // Camera icon text
+                    
                     g2.setColor(UITheme.TEXT_HINT);
                     g2.setFont(new Font("Segoe UI", Font.PLAIN, 22));
                     FontMetrics fm = g2.getFontMetrics();
@@ -458,13 +377,11 @@ public class AdminDashboard extends JFrame {
         imagePreviewPanel.setMaximumSize(new Dimension(100, 100));
         imagePreviewPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Status text (e.g., "Image selected ✔")
         imageStatusLabel = new JLabel("No image selected", SwingConstants.CENTER);
         imageStatusLabel.setFont(new Font("Segoe UI", Font.ITALIC, 10));
         imageStatusLabel.setForeground(UITheme.TEXT_HINT);
         imageStatusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // "Choose Image" button
         JButton chooseImgBtn = new JButton("📷  Choose Image") {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -490,7 +407,6 @@ public class AdminDashboard extends JFrame {
         chooseImgBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         chooseImgBtn.addActionListener(e -> pickImage());
 
-        // ── Item fields ────────────────────────────────────────────────────
         nameField     = makeFormField();
         priceField    = makeFormField();
         categoryCombo = new JComboBox<>(FoodDataStore.CATEGORIES);
@@ -502,7 +418,6 @@ public class AdminDashboard extends JFrame {
         availableBox.setForeground(UITheme.TEXT_PRI);
         availableBox.setSelected(true);
 
-        // ── Form assembly ──────────────────────────────────────────────────
         JPanel form = new JPanel();
         form.setBackground(UITheme.SURFACE);
         form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
@@ -524,7 +439,6 @@ public class AdminDashboard extends JFrame {
         form.add(Box.createVerticalStrut(12));
         form.add(availableBox);
 
-        // ── CRUD buttons ───────────────────────────────────────────────────
         JPanel buttons = new JPanel(new GridLayout(2, 2, 8, 8));
         buttons.setBackground(UITheme.SURFACE);
         buttons.setBorder(new EmptyBorder(16, 0, 0, 0));
@@ -538,10 +452,10 @@ public class AdminDashboard extends JFrame {
             String name = nameField.getText().trim(), priceStr = priceField.getText().trim();
             String cat  = (String) categoryCombo.getSelectedItem();
             if (!validate(name, priceStr)) return;
-            int newId = FoodDataStore.getNextItemId();          // peek at next ID
+            int newId = FoodDataStore.getNextItemId();          
             FoodDataStore.addFoodItem(
                 new FoodItem(newId, name, cat, Double.parseDouble(priceStr), availableBox.isSelected()));
-            saveImageForItem(newId);                            // save image with that ID
+            saveImageForItem(newId);                            
             clearForm();
             loadMenuGrid(null);
             showInfo("\"" + name + "\" added to the menu.");
@@ -556,7 +470,7 @@ public class AdminDashboard extends JFrame {
             selectedItem.setPrice(Double.parseDouble(priceStr));
             selectedItem.setAvailable(availableBox.isSelected());
             FoodDataStore.updateFoodItem(selectedItem);
-            saveImageForItem(selectedItem.getId());             // save new image if chosen
+            saveImageForItem(selectedItem.getId());             
             clearForm();
             loadMenuGrid(null);
             showInfo("Item updated successfully.");
@@ -585,14 +499,6 @@ public class AdminDashboard extends JFrame {
         return card;
     }
 
-    // =========================================================================
-    // IMAGE PICK & SAVE
-    // =========================================================================
-
-    /**
-     * Opens a JFileChooser filtered to image files.
-     * On selection the image is decoded and shown in the circular preview.
-     */
     private void pickImage() {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Select Food Image");
@@ -614,18 +520,6 @@ public class AdminDashboard extends JFrame {
         }
     }
 
-    /**
-     * Saves the pending image (if any) for the given food item ID.
-     *
-     * Writes a JPEG to two locations:
-     *   build/classes/.../resources/images/food_X.jpg  — active at runtime
-     *   src/.../resources/images/food_X.jpg            — persists after rebuild
-     *
-     * The image cache entry for this ID is invalidated so the grid reloads
-     * the new photo immediately.
-     *
-     * @param itemId Target food item ID
-     */
     private void saveImageForItem(int itemId) {
         if (pendingImageFile == null) return;
 
@@ -639,7 +533,7 @@ public class AdminDashboard extends JFrame {
             + "resources" + sep + "images" + sep + fileName);
 
         try {
-            // Convert to RGB (strips alpha so JPEG encoder works correctly)
+            
             BufferedImage rgb = new BufferedImage(
                 previewImg.getWidth(), previewImg.getHeight(), BufferedImage.TYPE_INT_RGB);
             Graphics2D g2 = rgb.createGraphics();
@@ -653,15 +547,11 @@ public class AdminDashboard extends JFrame {
             ImageIO.write(rgb, "jpg", buildDest);
             ImageIO.write(rgb, "jpg", srcDest);
 
-            IMAGE_CACHE.remove(itemId);   // force fresh load from disk
+            IMAGE_CACHE.remove(itemId);   
         } catch (IOException ex) {
             showError("Could not save image:\n" + ex.getMessage());
         }
     }
-
-    // =========================================================================
-    // ORDERS PANEL
-    // =========================================================================
 
     private JPanel buildOrdersPanel() {
         JPanel panel = new JPanel(new BorderLayout(0, 0));
@@ -703,10 +593,6 @@ public class AdminDashboard extends JFrame {
         return panel;
     }
 
-    // =========================================================================
-    // DATA
-    // =========================================================================
-
     private void loadOrders() {
         ordersTableModel.setRowCount(0);
         for (Order order : FoodDataStore.getOrders()) {
@@ -720,19 +606,6 @@ public class AdminDashboard extends JFrame {
         }
     }
 
-    // =========================================================================
-    // HELPERS
-    // =========================================================================
-
-    /**
-     * Builds a reusable circular image panel (used in grid cards).
-     *
-     * @param img   Image to display (null → coloured placeholder)
-     * @param plate Fallback plate colour
-     * @param item  FoodItem (used for initial letter fallback)
-     * @param size  Diameter in pixels
-     * @return Painted JPanel
-     */
     private JPanel buildCirclePanel(BufferedImage img, Color plate, FoodItem item, int size) {
         JPanel circle = new JPanel() {
             @Override
@@ -777,13 +650,6 @@ public class AdminDashboard extends JFrame {
         return circle;
     }
 
-    /**
-     * Loads a food image from the resources classpath by item ID.
-     * Tries .jpg then .jpeg. Results are cached.
-     *
-     * @param foodId Food item ID
-     * @return BufferedImage or null if not found
-     */
     private BufferedImage loadFoodImage(int foodId) {
         if (IMAGE_CACHE.containsKey(foodId)) return IMAGE_CACHE.get(foodId);
         BufferedImage img = null;

@@ -16,72 +16,40 @@ import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.util.*;
 
-/**
- * CustomerDashboard — full-screen customer-facing POS panel for City Bites.
- *
- * Layout:
- *   WEST   — dark-green sidebar (200 px) with welcome message and navigation
- *   CENTER — CardLayout content area:
- *              "MENU"     : category filter bar + 3-column food card grid (left)
- *                           + Order Details panel (right, 280 px)
- *              "MYORDERS" : table of this customer's past orders
- *
- * Programming paradigms demonstrated:
- *   OOP          — CustomerDashboard extends JFrame; uses CartItem, Order objects
- *   Event-Driven — card clicks, category buttons, cart actions all fire listeners
- *   Procedural   — confirmOrder(), refreshGrid() follow sequential steps
- *
- * @author NovaSoft Solutions (PVT) Ltd
- * @version 2.0
- */
 public class CustomerDashboard extends JFrame {
 
-    // ── Card keys ─────────────────────────────────────────────────────────────
     private static final String CARD_MENU   = "MENU";
     private static final String CARD_ORDERS = "MYORDERS";
 
-    // ── Tax rate applied to all orders ────────────────────────────────────────
     private static final double TAX_RATE = 0.10;
 
-    // ── Fallback plate colours for food cards that have no image ──────────────
     private static final Color[] PLATE_COLORS = {
         new Color(255, 183, 107), new Color(147, 197, 253), new Color(167, 243, 208),
         new Color(253, 164, 175), new Color(196, 181, 253), new Color(253, 230, 138),
         new Color(134, 239, 172), new Color(252, 165, 165),
     };
 
-    // ── Image cache — loaded once per session ─────────────────────────────────
     private static final Map<Integer, BufferedImage> IMAGE_CACHE = new HashMap<>();
 
-    // ── Cart — LinkedHashMap preserves insertion order ────────────────────────
     private final LinkedHashMap<Integer, CartItem> cart = new LinkedHashMap<>();
 
-    // ── State ─────────────────────────────────────────────────────────────────
     private final String customerName;
     private String       selectedCategory = "All";
 
-    // ── Menu panel components ─────────────────────────────────────────────────
     private JPanel   categoryBar;
     private JPanel   foodGrid;
     private CardLayout contentCards;
     private JPanel     contentPanel;
 
-    // ── Order panel labels ────────────────────────────────────────────────────
     private JPanel  cartItemsPanel;
     private JLabel  subtotalLabel;
     private JLabel  discountLabel;
     private JLabel  taxLabel;
     private JLabel  totalLabel;
 
-    // ── My Orders panel ───────────────────────────────────────────────────────
     private DefaultTableModel myOrdersModel;
     private JTable            myOrdersTable;
 
-    /**
-     * Constructs and displays the CustomerDashboard.
-     *
-     * @param customerName Username of the logged-in customer
-     */
     public CustomerDashboard(String customerName) {
         this.customerName = customerName;
         setTitle("City Bites — Customer Dashboard");
@@ -92,11 +60,6 @@ public class CustomerDashboard extends JFrame {
         setVisible(true);
     }
 
-    // ─── Root layout ─────────────────────────────────────────────────────────
-
-    /**
-     * Assembles the root panel: sidebar on the left, content area on the right.
-     */
     private void buildUI() {
         JPanel root = new JPanel(new BorderLayout());
         root.add(buildSidebar(),      BorderLayout.WEST);
@@ -104,22 +67,12 @@ public class CustomerDashboard extends JFrame {
         setContentPane(root);
     }
 
-    // =========================================================================
-    // SIDEBAR
-    // =========================================================================
-
-    /**
-     * Builds the 200-px dark-green sidebar with welcome message and nav buttons.
-     *
-     * @return Styled sidebar JPanel
-     */
     private JPanel buildSidebar() {
         JPanel sidebar = new JPanel();
         sidebar.setBackground(UITheme.SIDEBAR_BG);
         sidebar.setPreferredSize(new Dimension(200, 0));
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
 
-        // App name
         JPanel nameCell = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 18));
         nameCell.setBackground(UITheme.SIDEBAR_BG);
         nameCell.setMaximumSize(new Dimension(200, 62));
@@ -134,7 +87,6 @@ public class CustomerDashboard extends JFrame {
         sep.setMaximumSize(new Dimension(200, 1));
         sidebar.add(sep);
 
-        // Welcome message
         JPanel welcome = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 10));
         welcome.setBackground(UITheme.SIDEBAR_BG);
         welcome.setMaximumSize(new Dimension(200, 46));
@@ -153,14 +105,6 @@ public class CustomerDashboard extends JFrame {
         return sidebar;
     }
 
-    /**
-     * Creates a single navigation button panel for the sidebar.
-     *
-     * @param label  Button text
-     * @param action Runnable to execute on click
-     * @param active Whether this starts highlighted
-     * @return Styled JPanel acting as a button
-     */
     private JPanel makeSideBtn(String label, Runnable action, boolean active) {
         JPanel btn = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 12));
         btn.setBackground(active ? UITheme.SIDEBAR_HOVER : UITheme.SIDEBAR_BG);
@@ -178,15 +122,6 @@ public class CustomerDashboard extends JFrame {
         return btn;
     }
 
-    // =========================================================================
-    // CONTENT AREA
-    // =========================================================================
-
-    /**
-     * Builds the CardLayout content area.
-     *
-     * @return JPanel with CardLayout holding MENU and MYORDERS panels
-     */
     private JPanel buildContentArea() {
         contentCards = new CardLayout();
         contentPanel = new JPanel(contentCards);
@@ -196,16 +131,6 @@ public class CustomerDashboard extends JFrame {
         return contentPanel;
     }
 
-    // =========================================================================
-    // MENU PANEL — category filter + food card grid + order panel
-    // =========================================================================
-
-    /**
-     * Builds the main Menu panel split into a food-card area (left) and an
-     * Order Details panel (right).
-     *
-     * @return Menu JPanel
-     */
     private JPanel buildMenuPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(UITheme.BG);
@@ -214,26 +139,16 @@ public class CustomerDashboard extends JFrame {
         return panel;
     }
 
-    // ─── Left: food area ──────────────────────────────────────────────────────
-
-    /**
-     * Builds the food area: category filter bar on top, scrollable 3-column
-     * food card grid below.
-     *
-     * @return Food area JPanel
-     */
     private JPanel buildFoodArea() {
         JPanel area = new JPanel(new BorderLayout(0, 0));
         area.setBackground(UITheme.BG);
         area.setBorder(new EmptyBorder(18, 18, 18, 10));
 
-        // Page title
         JLabel title = new JLabel("Food Menu");
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
         title.setForeground(UITheme.TEXT_PRI);
         title.setBorder(new EmptyBorder(0, 0, 12, 0));
 
-        // Category filter bar
         categoryBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         categoryBar.setBackground(UITheme.BG);
         buildCategoryButtons();
@@ -243,7 +158,6 @@ public class CustomerDashboard extends JFrame {
         north.add(title,       BorderLayout.NORTH);
         north.add(categoryBar, BorderLayout.SOUTH);
 
-        // Food card grid (3 columns)
         foodGrid = new JPanel(new GridLayout(0, 3, 14, 14));
         foodGrid.setBackground(UITheme.BG);
         refreshGrid();
@@ -260,9 +174,6 @@ public class CustomerDashboard extends JFrame {
         return area;
     }
 
-    /**
-     * Builds and populates the category filter pill buttons inside categoryBar.
-     */
     private void buildCategoryButtons() {
         categoryBar.removeAll();
         String[] cats = buildCategoryList();
@@ -300,12 +211,6 @@ public class CustomerDashboard extends JFrame {
         categoryBar.repaint();
     }
 
-    /**
-     * Returns the full list of categories: "All" followed by the distinct
-     * categories present in FoodDataStore.
-     *
-     * @return Array of category strings
-     */
     private String[] buildCategoryList() {
         java.util.List<String> list = new ArrayList<>();
         list.add("All");
@@ -315,10 +220,6 @@ public class CustomerDashboard extends JFrame {
         return list.toArray(new String[0]);
     }
 
-    /**
-     * Clears and rebuilds the food card grid based on the selected category.
-     * Called on startup and every time the category filter changes.
-     */
     private void refreshGrid() {
         foodGrid.removeAll();
         for (FoodItem item : FoodDataStore.getFoodItems()) {
@@ -330,15 +231,6 @@ public class CustomerDashboard extends JFrame {
         foodGrid.repaint();
     }
 
-    /**
-     * Builds a single food card for the given item.
-     *
-     * Each card shows a circular food image (or coloured placeholder), the
-     * item name in bold, the price in green, and a green "Add" button.
-     *
-     * @param item The FoodItem to display
-     * @return Styled card JPanel
-     */
     private JPanel buildFoodCard(FoodItem item) {
         Color plate   = PLATE_COLORS[(item.getId() - 1) % PLATE_COLORS.length];
         BufferedImage img = loadFoodImage(item.getId());
@@ -348,13 +240,13 @@ public class CustomerDashboard extends JFrame {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                // Card shadow
+                
                 g2.setColor(new Color(0, 0, 0, 12));
                 g2.fillRoundRect(3, 4, getWidth() - 3, getHeight() - 3, 14, 14);
-                // Card background
+                
                 g2.setColor(UITheme.SURFACE);
                 g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 14, 14);
-                // Border (green on hover)
+                
                 g2.setColor(hovered[0] ? UITheme.PRIMARY : UITheme.BORDER);
                 g2.setStroke(new BasicStroke(hovered[0] ? 2f : 1f));
                 g2.drawRoundRect(0, 0, getWidth() - 2, getHeight() - 2, 14, 14);
@@ -365,7 +257,6 @@ public class CustomerDashboard extends JFrame {
         card.setBorder(new EmptyBorder(12, 12, 14, 12));
         card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // ── Circular food image ────────────────────────────────────────────
         JPanel circle = new JPanel() {
             @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -407,21 +298,18 @@ public class CustomerDashboard extends JFrame {
         circle.setMaximumSize(new Dimension(100, 100));
         circle.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // ── Name ──────────────────────────────────────────────────────────
         JLabel nameLbl = new JLabel("<html><center>" + item.getName() + "</center></html>",
                 SwingConstants.CENTER);
         nameLbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
         nameLbl.setForeground(UITheme.TEXT_PRI);
         nameLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // ── Price ─────────────────────────────────────────────────────────
         JLabel priceLbl = new JLabel("Rs. " + String.format("%.2f", item.getPrice()),
                 SwingConstants.CENTER);
         priceLbl.setFont(new Font("Segoe UI", Font.BOLD, 15));
         priceLbl.setForeground(UITheme.PRIMARY);
         priceLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // ── Add button ────────────────────────────────────────────────────
         JButton addBtn = new JButton("+ Add") {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -458,23 +346,12 @@ public class CustomerDashboard extends JFrame {
         return card;
     }
 
-    // ─── Right: Order Details panel ───────────────────────────────────────────
-
-    /**
-     * Builds the 280-px Order Details panel on the right side of the menu screen.
-     *
-     * Contains: cart item list, subtotal / discount / tax / total labels,
-     * Confirm Order and Clear buttons.
-     *
-     * @return Order Details JPanel
-     */
     private JPanel buildOrderPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(UITheme.SURFACE);
         panel.setPreferredSize(new Dimension(360, 0));
         panel.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, UITheme.BORDER));
 
-        // ── Header ────────────────────────────────────────────────────────
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(UITheme.SIDEBAR_BG);
         header.setBorder(new EmptyBorder(14, 16, 14, 16));
@@ -487,7 +364,6 @@ public class CustomerDashboard extends JFrame {
         header.add(title,   BorderLayout.WEST);
         header.add(custLbl, BorderLayout.EAST);
 
-        // ── Cart items list ────────────────────────────────────────────────
         cartItemsPanel = new JPanel();
         cartItemsPanel.setLayout(new BoxLayout(cartItemsPanel, BoxLayout.Y_AXIS));
         cartItemsPanel.setBackground(UITheme.SURFACE);
@@ -496,7 +372,6 @@ public class CustomerDashboard extends JFrame {
         cartScroll.getViewport().setBackground(UITheme.SURFACE);
         cartScroll.getVerticalScrollBar().setUnitIncrement(10);
 
-        // ── Totals ────────────────────────────────────────────────────────
         JPanel totals = new JPanel();
         totals.setBackground(UITheme.SURFACE);
         totals.setLayout(new BoxLayout(totals, BoxLayout.Y_AXIS));
@@ -530,7 +405,6 @@ public class CustomerDashboard extends JFrame {
         totals.add(makeTotalRow("Total", totalLabel));
         totals.add(Box.createVerticalStrut(14));
 
-        // ── Buttons ───────────────────────────────────────────────────────
         JButton confirmBtn = new JButton("Confirm Order") {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -588,13 +462,6 @@ public class CustomerDashboard extends JFrame {
         return panel;
     }
 
-    /**
-     * Creates a two-column summary row (title left, value right).
-     *
-     * @param title Title label text
-     * @param value Pre-created JLabel for the value
-     * @return Row JPanel
-     */
     private JPanel makeTotalRow(String title, JLabel value) {
         JPanel row = new JPanel(new BorderLayout());
         row.setBackground(UITheme.SURFACE);
@@ -607,16 +474,6 @@ public class CustomerDashboard extends JFrame {
         return row;
     }
 
-    // =========================================================================
-    // CART LOGIC
-    // =========================================================================
-
-    /**
-     * Adds one unit of a food item to the cart, or increments quantity if
-     * it is already present, then refreshes the order display.
-     *
-     * @param food The food item to add
-     */
     private void addToCart(FoodItem food) {
         int id = food.getId();
         if (cart.containsKey(id)) {
@@ -628,10 +485,6 @@ public class CustomerDashboard extends JFrame {
         updateOrderDisplay();
     }
 
-    /**
-     * Rebuilds the cart items panel and recalculates all totals.
-     * Called after every cart modification.
-     */
     private void updateOrderDisplay() {
         cartItemsPanel.removeAll();
 
@@ -666,23 +519,14 @@ public class CustomerDashboard extends JFrame {
         cartItemsPanel.repaint();
     }
 
-    /**
-     * Builds a single cart row with item name, +/− quantity controls,
-     * line subtotal and a remove (✕) button.
-     *
-     * @param itemId The food item ID
-     * @param ci     The CartItem data
-     * @return Cart row JPanel
-     */
     private JPanel buildCartRow(int itemId, CartItem ci) {
-        // ── Outer row ─────────────────────────────────────────────────────
+        
         JPanel row = new JPanel(new BorderLayout(10, 0));
         row.setBackground(UITheme.SURFACE);
         row.setBorder(new EmptyBorder(10, 14, 10, 14));
-        // No max-height limit — let content determine natural height
+        
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
-        // ── Left column: name / unit price / qty controls ─────────────────
         JPanel left = new JPanel();
         left.setBackground(UITheme.SURFACE);
         left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
@@ -698,7 +542,6 @@ public class CustomerDashboard extends JFrame {
         unitLbl.setForeground(UITheme.TEXT_SEC);
         unitLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // [−] [ qty ] [+]  — using GridBagLayout for precise sizing
         JPanel qtyRow = new JPanel(new GridBagLayout());
         qtyRow.setBackground(UITheme.SURFACE);
         qtyRow.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -724,7 +567,6 @@ public class CustomerDashboard extends JFrame {
         gc.gridx  = 1; gc.insets = new Insets(0, 0, 0, 4); qtyRow.add(qtyLbl, gc);
         gc.gridx  = 2; gc.insets = new Insets(0, 0, 0, 0); qtyRow.add(plusBtn, gc);
 
-        // Button actions
         minusBtn.addActionListener(e -> {
             int newQty = ci.getQuantity() - 1;
             if (newQty <= 0) cart.remove(itemId);
@@ -742,7 +584,6 @@ public class CustomerDashboard extends JFrame {
         left.add(Box.createVerticalStrut(6));
         left.add(qtyRow);
 
-        // ── Right column: subtotal + ✕ ────────────────────────────────────
         JPanel right = new JPanel();
         right.setBackground(UITheme.SURFACE);
         right.setLayout(new BoxLayout(right, BoxLayout.Y_AXIS));
@@ -777,7 +618,6 @@ public class CustomerDashboard extends JFrame {
         row.add(left,  BorderLayout.CENTER);
         row.add(right, BorderLayout.EAST);
 
-        // Light hover background on the row
         row.addMouseListener(new MouseAdapter() {
             @Override public void mouseEntered(MouseEvent e) {
                 row.setBackground(new Color(245, 252, 247));
@@ -796,12 +636,6 @@ public class CustomerDashboard extends JFrame {
         return row;
     }
 
-    /**
-     * Creates a small green quantity control button (+ or −).
-     *
-     * @param symbol "+" or "−"
-     * @return Styled JButton
-     */
     private JButton makeQtyButton(String symbol) {
         JButton btn = new JButton(symbol) {
             @Override protected void paintComponent(Graphics g) {
@@ -824,20 +658,6 @@ public class CustomerDashboard extends JFrame {
         return btn;
     }
 
-    // =========================================================================
-    // ORDER CONFIRMATION
-    // =========================================================================
-
-    /**
-     * Validates the cart, shows an order summary dialog, then saves the
-     * confirmed order to FoodDataStore and clears the cart.
-     *
-     * Sequential steps:
-     *   1. Validate cart is not empty
-     *   2. Build a human-readable summary
-     *   3. Show YES/NO confirmation dialog
-     *   4. Save order, clear cart, refresh display
-     */
     private void confirmOrder() {
         if (cart.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Your cart is empty.\nAdd some items first!",
@@ -877,15 +697,6 @@ public class CustomerDashboard extends JFrame {
         updateOrderDisplay();
     }
 
-    // =========================================================================
-    // MY ORDERS PANEL
-    // =========================================================================
-
-    /**
-     * Builds the My Orders panel showing this customer's past orders in a table.
-     *
-     * @return My Orders JPanel
-     */
     private JPanel buildMyOrdersPanel() {
         JPanel panel = new JPanel(new BorderLayout(0, 0));
         panel.setBackground(UITheme.BG);
@@ -942,9 +753,6 @@ public class CustomerDashboard extends JFrame {
         return panel;
     }
 
-    /**
-     * Reloads this customer's orders from FoodDataStore into the My Orders table.
-     */
     private void loadMyOrders() {
         if (myOrdersModel == null) return;
         myOrdersModel.setRowCount(0);
@@ -960,18 +768,6 @@ public class CustomerDashboard extends JFrame {
         }
     }
 
-    // =========================================================================
-    // IMAGE LOADING
-    // =========================================================================
-
-    /**
-     * Loads a food image from the resources folder by item ID.
-     * Tries .jpg then .jpeg extensions. Returns null if neither exists.
-     * Results are cached so each file is read only once per session.
-     *
-     * @param foodId The food item ID corresponding to food_X.jpg
-     * @return BufferedImage or null if not found
-     */
     private BufferedImage loadFoodImage(int foodId) {
         if (IMAGE_CACHE.containsKey(foodId)) return IMAGE_CACHE.get(foodId);
         BufferedImage img = null;
@@ -985,16 +781,6 @@ public class CustomerDashboard extends JFrame {
         return img;
     }
 
-    // =========================================================================
-    // UI HELPERS
-    // =========================================================================
-
-    /**
-     * Creates a styled JTable with alternating rows and a dark-green header.
-     *
-     * @param model The table data model
-     * @return Styled JTable
-     */
     private JTable buildStyledTable(DefaultTableModel model) {
         JTable table = new JTable(model) {
             @Override public Component prepareRenderer(TableCellRenderer r, int row, int col) {

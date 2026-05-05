@@ -11,19 +11,8 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 
-/**
- * SignupFrame — new customer registration screen.
- *
- * Shares the exact same visual layout as LoginSelectionFrame:
- *   Left  : decorative food photos on a diagonal green-strip background.
- *   Right : "Join the Family!" headline + signup form.
- *
- * @author NovaSoft Solutions (PVT) Ltd
- * @version 2.0
- */
 public class SignupFrame extends JFrame {
 
-    // ── Colour palette (mirrors LoginSelectionFrame) ───────────────────────────
     private static final Color BG_CREAM   = new Color(248, 252, 248);
     private static final Color STRIP_CLR  = new Color(190, 228, 205, 200);
     private static final Color GREEN_DARK = new Color( 27,  94,  32);
@@ -32,10 +21,8 @@ public class SignupFrame extends JFrame {
     private static final Color TEXT_MUT   = new Color(100, 130, 110);
     private static final Color BORDER_CLR = new Color(200, 230, 210);
 
-    // ── Hero images ───────────────────────────────────────────────────────────
     private BufferedImage imgA, imgB, imgC;
 
-    // ── Form fields ───────────────────────────────────────────────────────────
     private JTextField     usernameField;
     private JPasswordField passwordField;
     private JPasswordField confirmField;
@@ -51,12 +38,10 @@ public class SignupFrame extends JFrame {
         setVisible(true);
     }
 
-    // ─── Image loading ────────────────────────────────────────────────────────
-
     private void loadImages() {
-        imgA = loadImg(16);   // Ice Cream   — large
-        imgB = loadImg(7);    // Prawn Noodles — medium
-        imgC = loadImg(3);    // Crispy Wontons — small
+        imgA = loadImg(16);   
+        imgB = loadImg(7);    
+        imgC = loadImg(3);    
     }
 
     private BufferedImage loadImg(int id) {
@@ -68,10 +53,6 @@ public class SignupFrame extends JFrame {
         }
         return null;
     }
-
-    // =========================================================================
-    // ROOT  —  same 45 / 55 split as LoginSelectionFrame
-    // =========================================================================
 
     private void buildUI() {
         JPanel root = new JPanel(null) {
@@ -89,10 +70,6 @@ public class SignupFrame extends JFrame {
         setContentPane(root);
     }
 
-    // =========================================================================
-    // LEFT  —  decorative photo panel (identical style to LoginSelectionFrame)
-    // =========================================================================
-
     private JPanel buildPhotoPanel() {
         JPanel panel = new JPanel(null) {
             @Override
@@ -105,11 +82,9 @@ public class SignupFrame extends JFrame {
 
                 int w = getWidth(), h = getHeight();
 
-                // Cream background
                 g2.setColor(BG_CREAM);
                 g2.fillRect(0, 0, w, h);
 
-                // Diagonal accent strip
                 int slant  = 70;
                 int stripW = (int)(w * 0.75);
                 int[] xs = {0, stripW - slant, stripW + slant, 0};
@@ -117,27 +92,22 @@ public class SignupFrame extends JFrame {
                 g2.setColor(STRIP_CLR);
                 g2.fillPolygon(xs, ys, 4);
 
-                // Nav overlay background
                 g2.setColor(new Color(248, 252, 248, 220));
                 g2.fillRect(0, 0, w, 70);
 
-                // Subtle decorative lines
                 g2.setColor(new Color(150, 200, 170, 50));
                 g2.setStroke(new BasicStroke(1.2f));
                 g2.drawLine((int)(w*0.08),(int)(h*0.10),(int)(w*0.42),(int)(h*0.92));
                 g2.drawLine((int)(w*0.22),(int)(h*0.05),(int)(w*0.55),(int)(h*0.88));
 
-                // ── Circle A: large, lower-left ────────────────────────────
                 int sA = (int)(Math.min(w, h) * 0.44);
                 drawCircle(g2, imgA, (int)(w*0.04), (int)(h*0.42), sA,
                     new Color(200, 235, 220));
 
-                // ── Circle B: medium, upper-centre ────────────────────────
                 int sB = (int)(Math.min(w, h) * 0.30);
                 drawCircle(g2, imgB, (int)(w*0.42), (int)(h*0.10), sB,
                     new Color(255, 215, 160));
 
-                // ── Circle C: small, lower-right ──────────────────────────
                 int sC = (int)(Math.min(w, h) * 0.25);
                 drawCircle(g2, imgC, (int)(w*0.54), (int)(h*0.52), sC,
                     new Color(180, 220, 190));
@@ -145,13 +115,13 @@ public class SignupFrame extends JFrame {
 
             private void drawCircle(Graphics2D g2, BufferedImage img,
                                     int x, int y, int size, Color fallback) {
-                // Shadow
+                
                 g2.setColor(new Color(0, 0, 0, 20));
                 g2.fillOval(x + 4, y + 8, size, size);
-                // White ring
+                
                 g2.setColor(Color.WHITE);
                 g2.fillOval(x - 6, y - 6, size + 12, size + 12);
-                // Image or colour
+                
                 if (img != null) {
                     Shape clip = new Ellipse2D.Float(x, y, size, size);
                     Shape old  = g2.getClip();
@@ -162,7 +132,7 @@ public class SignupFrame extends JFrame {
                     g2.setColor(fallback);
                     g2.fillOval(x, y, size, size);
                 }
-                // Green border
+                
                 g2.setColor(new Color(0, 200, 83, 140));
                 g2.setStroke(new BasicStroke(2.5f));
                 g2.drawOval(x, y, size, size);
@@ -170,7 +140,6 @@ public class SignupFrame extends JFrame {
         };
         panel.setOpaque(false);
 
-        // City Bites logo overlay at top-left
         JPanel navOverlay = new JPanel(new FlowLayout(FlowLayout.LEFT, 18, 18));
         navOverlay.setOpaque(false);
         navOverlay.setPreferredSize(new Dimension(0, 70));
@@ -205,10 +174,6 @@ public class SignupFrame extends JFrame {
         return panel;
     }
 
-    // =========================================================================
-    // RIGHT  —  hero text + signup form
-    // =========================================================================
-
     private JPanel buildRightPanel() {
         JPanel outer = new JPanel(new GridBagLayout());
         outer.setBackground(BG_CREAM);
@@ -218,32 +183,26 @@ public class SignupFrame extends JFrame {
         inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
         inner.setMaximumSize(new Dimension(480, Integer.MAX_VALUE));
 
-        // ── Headline ──────────────────────────────────────────────────────
         JLabel h1  = leftLabel("Join the",   new Font("Segoe UI", Font.BOLD, 52), GREEN_DARK);
         JLabel h2  = leftLabel("Family!",    new Font("Segoe UI", Font.BOLD, 52), GREEN_PRI);
         JLabel sub = leftLabel("Create your free account today",
                                new Font("Segoe UI", Font.PLAIN, 18), TEXT_MUT);
         sub.setBorder(new EmptyBorder(4, 0, 28, 0));
 
-        // ── Username ──────────────────────────────────────────────────────
         usernameField = makeField();
 
-        // ── Password ──────────────────────────────────────────────────────
         passwordField = new JPasswordField();
         styleField(passwordField);
 
-        // ── Confirm Password ──────────────────────────────────────────────
         confirmField = new JPasswordField();
         styleField(confirmField);
         confirmField.addActionListener(e -> handleSignup());
 
-        // ── Error label ───────────────────────────────────────────────────
         errorLabel = new JLabel(" ");
         errorLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         errorLabel.setForeground(new Color(211, 47, 47));
         errorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // ── Create Account button ─────────────────────────────────────────
         JButton createBtn = new JButton("Create Account  →") {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -268,7 +227,6 @@ public class SignupFrame extends JFrame {
         createBtn.addActionListener(e -> handleSignup());
         getRootPane().setDefaultButton(createBtn);
 
-        // ── Back to login link ────────────────────────────────────────────
         JPanel backRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         backRow.setOpaque(false);
         backRow.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -287,7 +245,6 @@ public class SignupFrame extends JFrame {
         backRow.add(hasAcc);
         backRow.add(backBtn);
 
-        // ── Perks ─────────────────────────────────────────────────────────
         JPanel perks = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         perks.setOpaque(false);
         perks.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -296,7 +253,6 @@ public class SignupFrame extends JFrame {
             perks.add(makePill(p));
         }
 
-        // ── Assemble ──────────────────────────────────────────────────────
         inner.add(h1);
         inner.add(h2);
         inner.add(sub);
@@ -327,20 +283,6 @@ public class SignupFrame extends JFrame {
         return outer;
     }
 
-    // =========================================================================
-    // SIGNUP LOGIC
-    // =========================================================================
-
-    /**
-     * Validates the form and registers a new customer account.
-     *
-     * Steps:
-     *   1. Username not blank
-     *   2. Username not already taken
-     *   3. Password at least 6 characters
-     *   4. Passwords match
-     *   5. Register and return to landing page
-     */
     private void handleSignup() {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
@@ -375,10 +317,6 @@ public class SignupFrame extends JFrame {
         dispose();
         new LoginSelectionFrame();
     }
-
-    // =========================================================================
-    // HELPERS
-    // =========================================================================
 
     private JLabel leftLabel(String text, Font font, Color color) {
         JLabel lbl = new JLabel(text);

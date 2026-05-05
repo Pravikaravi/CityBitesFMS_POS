@@ -11,20 +11,8 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 
-/**
- * LoginSelectionFrame — all-in-one landing + login page for City Bites.
- *
- * Left  : Decorative food photos on a diagonal green-strip background.
- * Right : Hero headline + role toggle (Admin / Customer) + login form.
- *
- * No separate LoginFrame needed — authentication happens directly here.
- *
- * @author NovaSoft Solutions (PVT) Ltd
- * @version 6.0
- */
 public class LoginSelectionFrame extends JFrame {
 
-    // ── Colour palette ─────────────────────────────────────────────────────────
     private static final Color BG_CREAM   = new Color(248, 252, 248);
     private static final Color STRIP_CLR  = new Color(190, 228, 205, 200);
     private static final Color GREEN_DARK = new Color( 27,  94,  32);
@@ -33,14 +21,11 @@ public class LoginSelectionFrame extends JFrame {
     private static final Color TEXT_MUT   = new Color(100, 130, 110);
     private static final Color BORDER_CLR = new Color(200, 230, 210);
 
-    // ── Admin credentials (hardcoded) ──────────────────────────────────────────
     private static final String ADMIN_USER = "admin";
     private static final String ADMIN_PASS = "admin123";
 
-    // ── Hero images ───────────────────────────────────────────────────────────
     private BufferedImage imgA, imgB, imgC;
 
-    // ── Login form state ──────────────────────────────────────────────────────
     private boolean        isAdminMode = false;
     private JButton        adminTab, custTab;
     private JTextField     usernameField;
@@ -56,8 +41,6 @@ public class LoginSelectionFrame extends JFrame {
         buildUI();
         setVisible(true);
     }
-
-    // ─── Image loading ────────────────────────────────────────────────────────
 
     private void loadImages() {
         imgA = loadImg(4);
@@ -75,10 +58,6 @@ public class LoginSelectionFrame extends JFrame {
         return null;
     }
 
-    // =========================================================================
-    // ROOT  —  custom 45 / 55 split
-    // =========================================================================
-
     private void buildUI() {
         JPanel root = new JPanel(null) {
             @Override
@@ -95,10 +74,6 @@ public class LoginSelectionFrame extends JFrame {
         setContentPane(root);
     }
 
-    // =========================================================================
-    // LEFT  —  decorative photo panel
-    // =========================================================================
-
     private JPanel buildPhotoPanel() {
         JPanel panel = new JPanel(null) {
             @Override
@@ -111,11 +86,9 @@ public class LoginSelectionFrame extends JFrame {
 
                 int w = getWidth(), h = getHeight();
 
-                // Cream background
                 g2.setColor(BG_CREAM);
                 g2.fillRect(0, 0, w, h);
 
-                // Diagonal accent strip
                 int slant = 70;
                 int stripW = (int)(w * 0.75);
                 int[] xs = {0, stripW - slant, stripW + slant, 0};
@@ -123,29 +96,24 @@ public class LoginSelectionFrame extends JFrame {
                 g2.setColor(STRIP_CLR);
                 g2.fillPolygon(xs, ys, 4);
 
-                // Nav bar area background
                 g2.setColor(new Color(248, 252, 248, 230));
                 g2.fillRect(0, 0, w, 70);
 
-                // Subtle decorative lines
                 g2.setColor(new Color(150, 200, 170, 50));
                 g2.setStroke(new BasicStroke(1.2f));
                 g2.drawLine((int)(w*0.08),(int)(h*0.10),(int)(w*0.42),(int)(h*0.92));
                 g2.drawLine((int)(w*0.22),(int)(h*0.05),(int)(w*0.55),(int)(h*0.88));
 
-                // ── Circle A: large, lower-left ────────────────────────────
                 int sA = (int)(Math.min(w, h) * 0.44);
                 int xA = (int)(w * 0.04);
                 int yA = (int)(h * 0.42);
                 drawCircle(g2, imgA, xA, yA, sA, new Color(180, 220, 190));
 
-                // ── Circle B: medium, upper-centre ────────────────────────
                 int sB = (int)(Math.min(w, h) * 0.30);
                 int xB = (int)(w * 0.42);
                 int yB = (int)(h * 0.10);
                 drawCircle(g2, imgB, xB, yB, sB, new Color(255, 215, 160));
 
-                // ── Circle C: small, overlapping right ────────────────────
                 int sC = (int)(Math.min(w, h) * 0.25);
                 int xC = (int)(w * 0.54);
                 int yC = (int)(h * 0.52);
@@ -154,10 +122,10 @@ public class LoginSelectionFrame extends JFrame {
 
             private void drawCircle(Graphics2D g2, BufferedImage img,
                                     int x, int y, int size, Color fallback) {
-                // Drop shadow
+                
                 g2.setColor(new Color(0, 0, 0, 20));
                 g2.fillOval(x + 4, y + 8, size, size);
-                // White ring
+                
                 g2.setColor(Color.WHITE);
                 g2.fillOval(x - 6, y - 6, size + 12, size + 12);
 
@@ -171,7 +139,7 @@ public class LoginSelectionFrame extends JFrame {
                     g2.setColor(fallback);
                     g2.fillOval(x, y, size, size);
                 }
-                // Green ring border
+                
                 g2.setColor(new Color(0, 200, 83, 140));
                 g2.setStroke(new BasicStroke(2.5f));
                 g2.drawOval(x, y, size, size);
@@ -179,7 +147,6 @@ public class LoginSelectionFrame extends JFrame {
         };
         panel.setOpaque(false);
 
-        // ── App name overlay at top-left ──────────────────────────────────
         JPanel navOverlay = new JPanel(new FlowLayout(FlowLayout.LEFT, 18, 18));
         navOverlay.setOpaque(false);
         navOverlay.setPreferredSize(new Dimension(0, 70));
@@ -214,27 +181,20 @@ public class LoginSelectionFrame extends JFrame {
         return panel;
     }
 
-    // =========================================================================
-    // RIGHT  —  hero text + login form (all-in-one)
-    // =========================================================================
-
     private JPanel buildRightPanel() {
         JPanel outer = new JPanel(new GridBagLayout());
         outer.setBackground(BG_CREAM);
 
-        // Scrollable in case screen is short
         JPanel inner = new JPanel();
         inner.setOpaque(false);
         inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
         inner.setMaximumSize(new Dimension(480, Integer.MAX_VALUE));
 
-        // ── Headline ──────────────────────────────────────────────────────
         JLabel h1 = leftLabel("Craving", new Font("Segoe UI", Font.BOLD, 52), GREEN_DARK);
         JLabel h2 = leftLabel("Something?", new Font("Segoe UI", Font.BOLD, 52), GREEN_PRI);
         JLabel sub = leftLabel("Sign in to get started!", new Font("Segoe UI", Font.PLAIN, 18), TEXT_MUT);
         sub.setBorder(new EmptyBorder(4, 0, 28, 0));
 
-        // ── Role toggle ───────────────────────────────────────────────────
         JPanel togglePanel = new JPanel(new GridLayout(1, 2, 0, 0)) {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -252,7 +212,7 @@ public class LoginSelectionFrame extends JFrame {
         togglePanel.setBorder(new EmptyBorder(2, 2, 2, 2));
 
         adminTab = buildToggleBtn("  Admin  ", false);
-        custTab  = buildToggleBtn("  Customer  ", true);   // default selected
+        custTab  = buildToggleBtn("  Customer  ", true);   
 
         adminTab.addActionListener(e -> {
             isAdminMode = true;
@@ -274,23 +234,19 @@ public class LoginSelectionFrame extends JFrame {
         togglePanel.add(adminTab);
         togglePanel.add(custTab);
 
-        // ── Username field ────────────────────────────────────────────────
         JLabel userLbl = fieldLabel("Username");
         usernameField  = makeField();
 
-        // ── Password field ────────────────────────────────────────────────
         JLabel passLbl = fieldLabel("Password");
         passwordField  = new JPasswordField();
         styleField(passwordField);
         passwordField.addActionListener(e -> handleLogin());
 
-        // ── Error label ───────────────────────────────────────────────────
         errorLabel = new JLabel(" ");
         errorLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         errorLabel.setForeground(new Color(211, 47, 47));
         errorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // ── Login button ──────────────────────────────────────────────────
         JButton loginBtn = new JButton("Login  →") {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -315,7 +271,6 @@ public class LoginSelectionFrame extends JFrame {
         loginBtn.addActionListener(e -> handleLogin());
         getRootPane().setDefaultButton(loginBtn);
 
-        // ── Signup link ───────────────────────────────────────────────────
         JPanel signupRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         signupRow.setOpaque(false);
         signupRow.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -334,14 +289,12 @@ public class LoginSelectionFrame extends JFrame {
         signupRow.add(newHere);
         signupRow.add(signupBtn);
 
-        // ── Demo hint ─────────────────────────────────────────────────────
         JLabel hint = new JLabel(
             "<html><font color='#8FB89A'>Admin: admin / admin123 &nbsp;|&nbsp; "
             + "Customer: user / user123</font></html>");
         hint.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         hint.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // ── Category pills ────────────────────────────────────────────────
         JPanel pills = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         pills.setOpaque(false);
         pills.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -350,7 +303,6 @@ public class LoginSelectionFrame extends JFrame {
             pills.add(makePill(p));
         }
 
-        // ── Assemble ──────────────────────────────────────────────────────
         inner.add(h1);
         inner.add(h2);
         inner.add(sub);
@@ -379,10 +331,6 @@ public class LoginSelectionFrame extends JFrame {
         return outer;
     }
 
-    // =========================================================================
-    // LOGIN LOGIC
-    // =========================================================================
-
     private void handleLogin() {
         String user = usernameField.getText().trim();
         String pass = new String(passwordField.getPassword());
@@ -409,10 +357,6 @@ public class LoginSelectionFrame extends JFrame {
             }
         }
     }
-
-    // =========================================================================
-    // HELPERS
-    // =========================================================================
 
     private JButton buildToggleBtn(String text, boolean selected) {
         JButton btn = new JButton(text) {

@@ -5,22 +5,6 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 
-/**
- * Full-screen customer registration screen.
- *
- * Left  — dark sidebar matching the POS brand theme.
- * Right — light panel with a centred white signup card.
- *
- * Validates input, checks for duplicate usernames via DataStore, then
- * registers the account and navigates to CustomerLoginFrame with the
- * new username pre-filled.
- *
- * Demonstrates Event-Driven Programming via ActionListeners on the
- * Sign Up button and the confirm-password field (Enter key to submit).
- *
- * @author NovaSoft Solutions (PVT) Ltd
- * @version 4.0
- */
 public class CustomerSignupFrame extends JFrame {
 
     private JTextField     usernameField;
@@ -43,8 +27,6 @@ public class CustomerSignupFrame extends JFrame {
         root.add(buildFormPanel(), BorderLayout.CENTER);
         setContentPane(root);
     }
-
-    // ─── Left dark panel ──────────────────────────────────────────────────────
 
     private JPanel buildHeroPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
@@ -132,8 +114,6 @@ public class CustomerSignupFrame extends JFrame {
         return panel;
     }
 
-    // ─── Right form panel ─────────────────────────────────────────────────────
-
     private JPanel buildFormPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(UITheme.BG);
@@ -220,18 +200,6 @@ public class CustomerSignupFrame extends JFrame {
         return panel;
     }
 
-    // ─── Signup logic ─────────────────────────────────────────────────────────
-
-    /**
-     * Validates the form and registers a new customer account.
-     *
-     * Sequential validation steps:
-     *   1. Username must not be blank
-     *   2. Username must not already exist
-     *   3. Password must be at least 4 characters
-     *   4. Confirm password must match
-     *   5. Register and navigate to login
-     */
     private void handleSignup() {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
@@ -264,8 +232,6 @@ public class CustomerSignupFrame extends JFrame {
         CustomerLoginFrame loginFrame = new CustomerLoginFrame();
         loginFrame.prefillUsername(username);
     }
-
-    // ─── Helpers ──────────────────────────────────────────────────────────────
 
     private JLabel makeLabel(String text) {
         JLabel lbl = new JLabel(text);

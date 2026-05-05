@@ -5,18 +5,6 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 
-/**
- * Full-screen customer login screen.
- *
- * Left  — dark sidebar with brand identity matching the POS theme.
- * Right — light panel with a centred white login card.
- *
- * Validates credentials against DataStore and navigates to CustomerDashboard
- * on success. Demonstrates Event-Driven Programming via ActionListeners.
- *
- * @author NovaSoft Solutions (PVT) Ltd
- * @version 4.0
- */
 public class CustomerLoginFrame extends JFrame {
 
     private JTextField     usernameField;
@@ -39,8 +27,6 @@ public class CustomerLoginFrame extends JFrame {
         setContentPane(root);
     }
 
-    // ─── Left dark panel ──────────────────────────────────────────────────────
-
     private JPanel buildHeroPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(UITheme.SIDEBAR_BG);
@@ -50,7 +36,6 @@ public class CustomerLoginFrame extends JFrame {
         inner.setOpaque(false);
         inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
 
-        // Logo
         JPanel logo = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -127,8 +112,6 @@ public class CustomerLoginFrame extends JFrame {
         panel.add(inner);
         return panel;
     }
-
-    // ─── Right form panel ─────────────────────────────────────────────────────
 
     private JPanel buildFormPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
@@ -217,14 +200,10 @@ public class CustomerLoginFrame extends JFrame {
         return panel;
     }
 
-    // ─── Public API ───────────────────────────────────────────────────────────
-
     public void prefillUsername(String username) {
         usernameField.setText(username);
         passwordField.requestFocus();
     }
-
-    // ─── Auth logic ───────────────────────────────────────────────────────────
 
     private void handleLogin() {
         String username = usernameField.getText().trim();
@@ -242,8 +221,6 @@ public class CustomerLoginFrame extends JFrame {
             usernameField.requestFocus();
         }
     }
-
-    // ─── Helpers ──────────────────────────────────────────────────────────────
 
     private JLabel makeLabel(String text) {
         JLabel lbl = new JLabel(text);

@@ -7,22 +7,11 @@ import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 
-/**
- * LoginFrame — full-screen login screen for City Bites.
- *
- * Layout: custom percentage-based split (40% brand | 60% form).
- * This guarantees correct proportions on any screen size / resolution.
- *
- * @author NovaSoft Solutions (PVT) Ltd
- * @version 3.0
- */
 public class LoginFrame extends JFrame {
 
-    // ── Credentials ───────────────────────────────────────────────────────────
     private static final String ADMIN_USER = "admin";
     private static final String ADMIN_PASS = "admin123";
 
-    // ── Input components ──────────────────────────────────────────────────────
     private JTextField     usernameField;
     private JPasswordField passwordField;
     private JRadioButton   adminRadio;
@@ -38,12 +27,8 @@ public class LoginFrame extends JFrame {
         setVisible(true);
     }
 
-    // =========================================================================
-    // ROOT  —  custom 40 / 60 split
-    // =========================================================================
-
     private void buildUI() {
-        // Custom layout: left = 40 %, right = 60 %
+        
         JPanel root = new JPanel(null) {
             @Override
             public void doLayout() {
@@ -58,20 +43,15 @@ public class LoginFrame extends JFrame {
         setContentPane(root);
     }
 
-    // =========================================================================
-    // LEFT  —  brand panel
-    // =========================================================================
-
     private JPanel buildBrandPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(new Color(27, 94, 32));   // dark green
+        panel.setBackground(new Color(27, 94, 32));   
 
         JPanel inner = new JPanel();
         inner.setOpaque(false);
         inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
         inner.setMaximumSize(new Dimension(380, Integer.MAX_VALUE));
 
-        // ── CB logo circle ────────────────────────────────────────────────
         JPanel logoBadge = new JPanel() {
             @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -116,7 +96,6 @@ public class LoginFrame extends JFrame {
         tagline.setHorizontalAlignment(SwingConstants.CENTER);
         tagline.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Feature list
         String[] features = {
             "✔  Full Menu Browsing by Category",
             "✔  Live Cart with Quantity Control",
@@ -152,15 +131,10 @@ public class LoginFrame extends JFrame {
         return panel;
     }
 
-    // =========================================================================
-    // RIGHT  —  form panel
-    // =========================================================================
-
     private JPanel buildFormPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(new Color(245, 248, 245));
 
-        // ── Card ──────────────────────────────────────────────────────────
         JPanel card = new JPanel();
         card.setBackground(Color.WHITE);
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
@@ -170,11 +144,9 @@ public class LoginFrame extends JFrame {
         card.setPreferredSize(new Dimension(460, 570));
         card.setMaximumSize(new Dimension(460, 570));
 
-        // ── Heading ────────────────────────────────────────────────────────
         JLabel heading = centeredLabel("Welcome Back!", new Font("Segoe UI", Font.BOLD, 30), new Color(22, 30, 22));
         JLabel sub     = centeredLabel("Sign in to continue", new Font("Segoe UI", Font.PLAIN, 15), new Color(100, 130, 110));
 
-        // ── Role selector ──────────────────────────────────────────────────
         adminRadio    = styledRadio("Admin");
         customerRadio = styledRadio("Customer");
         customerRadio.setSelected(true);
@@ -204,38 +176,31 @@ public class LoginFrame extends JFrame {
         }});
         roleBox.add(customerRadio);
 
-        // ── Username ────────────────────────────────────────────────────────
         usernameField = styledField();
 
-        // ── Password ────────────────────────────────────────────────────────
         passwordField = new JPasswordField();
         styleTextField(passwordField);
         passwordField.addActionListener(e -> handleLogin());
 
-        // ── Error label ─────────────────────────────────────────────────────
         errorLabel = new JLabel(" ");
         errorLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         errorLabel.setForeground(new Color(211, 47, 47));
         errorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // ── Login button ─────────────────────────────────────────────────────
         JButton loginBtn = makeButton("Login", new Color(0, 200, 83), Color.WHITE);
         loginBtn.addActionListener(e -> handleLogin());
         getRootPane().setDefaultButton(loginBtn);
 
-        // ── Create Account button ─────────────────────────────────────────────
         JButton signupBtn = makeOutlineButton("Don't have an account?  Create one →");
         signupBtn.addActionListener(e -> { dispose(); new SignupFrame(); });
         signupBtn.setVisible(customerRadio.isSelected());
         customerRadio.addActionListener(e -> signupBtn.setVisible(true));
         adminRadio   .addActionListener(e -> signupBtn.setVisible(false));
 
-        // ── Hint ──────────────────────────────────────────────────────────────
         JLabel hint = centeredLabel(
             "Admin: admin / admin123  |  Customer: user / user123",
             new Font("Segoe UI", Font.PLAIN, 11), new Color(180, 200, 185));
 
-        // ── Assemble card ─────────────────────────────────────────────────────
         card.add(heading);
         card.add(Box.createVerticalStrut(5));
         card.add(sub);
@@ -264,10 +229,6 @@ public class LoginFrame extends JFrame {
         return panel;
     }
 
-    // =========================================================================
-    // AUTH LOGIC
-    // =========================================================================
-
     private void handleLogin() {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
@@ -292,26 +253,16 @@ public class LoginFrame extends JFrame {
         }
     }
 
-    // =========================================================================
-    // PUBLIC API
-    // =========================================================================
-
-    /** Pre-fills username and selects Customer role — called after signup. */
     public void prefillCustomer(String username) {
         customerRadio.setSelected(true);
         usernameField.setText(username);
         passwordField.requestFocus();
     }
 
-    /** Pre-selects the Admin role — called from the landing page. */
     public void selectAdmin() {
         adminRadio.setSelected(true);
         usernameField.requestFocus();
     }
-
-    // =========================================================================
-    // HELPERS
-    // =========================================================================
 
     private JLabel centeredLabel(String text, Font font, Color color) {
         JLabel lbl = new JLabel(text, SwingConstants.CENTER);
@@ -344,7 +295,7 @@ public class LoginFrame extends JFrame {
             new EmptyBorder(10, 14, 10, 14)));
         f.setBackground(new Color(248, 252, 249));
         f.setCaretColor(new Color(27, 94, 32));
-        // Focus highlight
+        
         f.addFocusListener(new FocusAdapter() {
             @Override public void focusGained(FocusEvent e) {
                 f.setBorder(BorderFactory.createCompoundBorder(
